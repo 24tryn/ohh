@@ -1,8 +1,8 @@
 {
   "app": "ohh",
-  "version": "1.0.0",
-  "buildDate": "2025-12-06T00:00:00Z",
-  "releaseNotes": "Initial release with Web3 wallet integration, task management, and email reminders",
+  "version": "1.0.1",
+  "buildDate": "2025-12-06T12:00:00Z",
+  "releaseNotes": "Added comprehensive usage tracking and analytics - monitor app usage, feature adoption, and user engagement metrics",
   "features": {
     "walletIntegration": {
       "enabled": true,
@@ -17,6 +17,10 @@
     "emailReminders": {
       "enabled": true,
       "interval": 300000
+    },
+    "usageTracking": {
+      "enabled": true,
+      "metricsTracked": ["sessions", "visits", "tasksCreated", "tasksCompleted", "walletConnections", "featureUsage"]
     }
   },
   "breaking": false,

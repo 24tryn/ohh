@@ -6,6 +6,7 @@ class OhhTaskManager {
         this.tasks = this.loadTasks();
         this.userEmail = this.loadUserEmail();
         this.reminderSettings = this.loadReminderSettings();
+        this.usageStats = this.loadUsageStats();
         this.wallet = {
             connected: false,
             address: null,
@@ -20,6 +21,7 @@ class OhhTaskManager {
     }
 
     init() {
+        this.trackUsage();
         this.setupEventListeners();
         this.renderTasks();
         this.updateStats();
@@ -32,15 +34,20 @@ class OhhTaskManager {
         // Search functionality
         document.getElementById('searchTasks')?.addEventListener('input', (e) => {
             this.searchQuery = e.target.value.toLowerCase();
+            if (this.searchQuery.length > 0) {
+                this.trackFeatureUsage('searchUsed');
+            }
             this.renderTasks();
         });
 
         // Filter and sort buttons
         document.getElementById('filterBtn')?.addEventListener('click', () => {
+            this.trackFeatureUsage('filterUsed');
             this.cycleFilter();
         });
 
         document.getElementById('sortBtn')?.addEventListener('click', () => {
+            this.trackFeatureUsage('sortUsed');
             this.cycleSort();
         });
 
@@ -184,6 +191,7 @@ class OhhTaskManager {
             this.wallet.address = accounts[0];
             this.wallet.network = `0x${chainId}`;
             this.wallet.type = 'evm';
+            this.trackWalletConnection();
 
             this.saveWalletState();
             this.updateWalletUI();
@@ -350,6 +358,7 @@ class OhhTaskManager {
         };
 
         this.tasks.push(task);
+        this.trackTaskCreated();
         this.saveTasks();
         this.renderTasks();
         this.updateStats();
@@ -368,6 +377,9 @@ class OhhTaskManager {
         const task = this.tasks.find(t => t.id === id);
         if (task) {
             task.completed = !task.completed;
+            if (task.completed) {
+                this.trackTaskCompleted();
+            }
             this.saveTasks();
             this.renderTasks();
             this.updateStats();
@@ -599,6 +611,7 @@ class OhhTaskManager {
 
         this.userEmail = email;
         localStorage.setItem('ohhUserEmail', email);
+        this.trackFeatureUsage('emailRemindersUsed');
         this.updateEmailStatus();
         alert(`✅ Email saved! We'll send reminders to ${email}`);
     }
@@ -785,6 +798,93 @@ class OhhTaskManager {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // ========== USAGE TRACKING ==========
+    loadUsageStats() {
+        const stored = localStorage.getItem('ohhUsageStats');
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        return {
+            totalSessions: 0,
+            totalVisits: 0,
+            firstVisit: new Date().toISOString(),
+            lastVisit: new Date().toISOString(),
+            totalTasksCreated: 0,
+            totalTasksCompleted: 0,
+            totalTimesWalletConnected: 0,
+            averageSessionDuration: 0,
+            features: {
+                searchUsed: 0,
+                filterUsed: 0,
+                sortUsed: 0,
+                emailRemindersUsed: 0,
+                walletConnected: 0,
+                tasksWithReminders: 0
+            }
+        };
+    }
+
+    trackUsage() {
+        // Increment session and visit counters
+        this.usageStats.totalSessions++;
+        this.usageStats.totalVisits++;
+        this.usageStats.lastVisit = new Date().toISOString();
+
+        // Track session start time for duration calculation
+        this.sessionStartTime = Date.now();
+
+        // Save updated stats
+        this.saveUsageStats();
+
+        // Log to console for debugging
+        console.log('📊 Usage tracked:', {
+            sessions: this.usageStats.totalSessions,
+            visits: this.usageStats.totalVisits,
+            tasksCreated: this.usageStats.totalTasksCreated,
+            tasksCompleted: this.usageStats.totalTasksCompleted
+        });
+    }
+
+    trackFeatureUsage(feature) {
+        if (this.usageStats.features[feature] !== undefined) {
+            this.usageStats.features[feature]++;
+            this.saveUsageStats();
+        }
+    }
+
+    trackTaskCreated() {
+        this.usageStats.totalTasksCreated++;
+        this.saveUsageStats();
+    }
+
+    trackTaskCompleted() {
+        this.usageStats.totalTasksCompleted++;
+        this.saveUsageStats();
+    }
+
+    trackWalletConnection() {
+        this.usageStats.totalTimesWalletConnected++;
+        this.usageStats.features.walletConnected++;
+        this.saveUsageStats();
+    }
+
+    saveUsageStats() {
+        localStorage.setItem('ohhUsageStats', JSON.stringify(this.usageStats));
+    }
+
+    getUsageReport() {
+        const report = {
+            ...this.usageStats,
+            taskCompletionRate: this.usageStats.totalTasksCreated > 0 
+                ? ((this.usageStats.totalTasksCompleted / this.usageStats.totalTasksCreated) * 100).toFixed(2) + '%'
+                : '0%',
+            averageTasksPerSession: this.usageStats.totalSessions > 0
+                ? (this.usageStats.totalTasksCreated / this.usageStats.totalSessions).toFixed(2)
+                : 0
+        };
+        return report;
     }
 }
 
