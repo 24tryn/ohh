@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ohh - Web3 Task Manager</title>
+    <!-- Performance: Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
+    <!-- Google Fonts - Modern & Attractive (Optimized subset) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="ohh icon.jpeg" />
+
+    <!-- SEO & Accessibility -->
+    <meta
+      name="description"
+      content="ohh - A Web3 Task Manager to help you remember on-chain activities, staking, and claiming opportunities"
+    />
+    <!-- Performance: Optimize Critical CSS -->
+    <style>
+      /* Critical rendering path - above the fold styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+        color: #e0e6ed;
+        line-height: 1.6;
+        min-height: 100vh;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Lazy load deferred styles */
+      @supports (content-visibility: auto) {
+        .modal,
+        footer {
+          content-visibility: auto;
+          contain-intrinsic-size: auto 500px;
+        }
+      }
+
+      <!-- Main CSS Stylesheet -- > header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #2a3a4f;
+        flex-wrap: wrap;
+        gap: 16px;
+        background: linear-gradient(
+          180deg,
+          rgba(15, 20, 25, 0.98) 0%,
+          rgba(15, 20, 25, 0.92) 100%
+        );
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        font-size: 24px;
+        font-weight: 700;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .logo img {
+        height: 40px;
+        width: 40px;
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(79, 147, 255, 0.2);
+      }
+
+      .logo:hover {
+        transform: scale(1.02);
+      }
+
+      .logo-text {
+        background: linear-gradient(135deg, #4f93ff 0%, #7cb9ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      /* Buttons - Material Design 3 Inspired */
+      button {
+        padding: 10px 20px;
+        border: 1px solid #3a4a5f;
+        background-color: #1a2332;
+        color: #e0e6ed;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: "Inter", sans-serif;
+        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 40px;
+        white-space: nowrap;
+      }
+
+      button:hover {
+        background-color: #2a3a4f;
+        border-color: #4f93ff;
+        box-shadow: 0 4px 12px rgba(79, 147, 255, 0.2),
+          inset 0 0 0 1px rgba(79, 147, 255, 0.1);
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        background-color: #1a2332;
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #4f93ff 0%, #3d7ae8 100%);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 2px 8px rgba(79, 147, 255, 0.2);
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #6ba3ff 0%, #4d8ef8 100%);
+        box-shadow: 0 6px 16px rgba(79, 147, 255, 0.3);
+      }
+
+      .btn-secondary {
+        background-color: #1a2332;
+        color: #b0b8c1;
+        border: 1px solid #3a4a5f;
+      }
+
+      .btn-secondary:hover {
+        background-color: #2a3a4f;
+        border-color: #4f93ff;
+        color: #e0e6ed;
+      }
+
+      .btn-danger {
+        background-color: rgba(255, 107, 107, 0.1);
+        color: #ff8585;
+        border: 1px solid rgba(255, 107, 107, 0.3);
+      }
+
+      .btn-danger:hover {
+        background-color: rgba(255, 107, 107, 0.15);
+        border-color: #ff8585;
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.15);
+      }
+
+      /* Animations */
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+
+      /* Main Container - SaaS Dashboard Layout */
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 32px 24px;
+      }
+
+      /* Welcome Section - Hero Area */
+      .welcome-section {
+        margin-bottom: 40px;
+        padding: 40px 32px;
+        background: linear-gradient(
+          135deg,
+          rgba(79, 147, 255, 0.05) 0%,
+          rgba(123, 185, 255, 0.02) 100%
+        );
+        border: 1px solid rgba(79, 147, 255, 0.1);
+        border-radius: 12px;
+        text-align: left;
+        backdrop-filter: blur(10px);
+      }
+
+      .welcome-section h1 {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #4f93ff 0%, #7cb9ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: "Poppins", sans-serif;
+        letter-spacing: -0.5px;
+      }
+
+      .welcome-section p {
+        font-size: 15px;
+        color: #a0aab8;
+        margin-bottom: 16px;
+        font-weight: 400;
+        letter-spacing: 0.4px;
+        max-width: 600px;
+      }
+
+      .wallet-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background-color: rgba(26, 35, 50, 0.6);
+        border: 1px solid #3a4a5f;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #b0b8c1;
+        margin-top: 16px;
+        font-weight: 500;
+      }
+
+      .wallet-status.connected {
+        background-color: rgba(102, 187, 106, 0.1);
+        color: #66bb6a;
+        border: 1px solid #43a047;
+      }
+
+      /* Main Content - Improved Grid */
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 28px;
+        margin-bottom: 40px;
+      }
+
+      /* Tasks Section - Card Style */
+      .tasks-section {
+        background: linear-gradient(
+          135deg,
+          rgba(26, 35, 50, 0.7) 0%,
+          rgba(20, 28, 40, 0.5) 100%
+        );
+        border-radius: 12px;
+        padding: 28px;
+        border: 1px solid #2a3a4f;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .tasks-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .tasks-header h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #e0e6ed;
+        font-family: "Poppins", sans-serif;
+        letter-spacing: -0.3px;
+      }
+
+      .tasks-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        background-color: rgba(26, 35, 50, 0.5);
+        border: 1px solid #3a4a5f;
+        border-radius: 8px;
+        min-width: 200px;
+        transition: all 0.2s ease;
+      }
+
+      .search-box:focus-within {
+        border-color: #4f93ff;
+        box-shadow: 0 0 8px rgba(79, 147, 255, 0.15);
+      }
+
+      .search-box input {
+        flex: 1;
+        background: none;
+        border: none;
+        color: #e0e6ed;
+        font-size: 13px;
+        font-family: "Inter", sans-serif;
+      }
+
+      .search-box input::placeholder {
+        color: #7a8594;
+      }
+
+      .filter-btn, .sort-btn {
+        padding: 8px 12px;
+        background-color: rgba(79, 147, 255, 0.1);
+        border: 1px solid rgba(79, 147, 255, 0.3);
+        border-radius: 6px;
+        color: #4f93ff;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-btn:hover, .sort-btn:hover {
+        background-color: rgba(79, 147, 255, 0.2);
+        border-color: rgba(79, 147, 255, 0.5);
+      }
+
+      .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        gap: 3px;
+      }
+
+      .priority-high {
+        background-color: rgba(244, 67, 54, 0.15);
+        color: #f44336;
+      }
+
+      .priority-medium {
+        background-color: rgba(255, 152, 0, 0.15);
+        color: #ff9800;
+      }
+
+      .priority-low {
+        background-color: rgba(76, 175, 80, 0.15);
+        color: #4caf50;
+      }
+
+      .task-progress-bar {
+        width: 100%;
+        height: 4px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .task-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4f93ff 0%, #7cb9ff 100%);
+        transition: width 0.3s ease;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      input[type="text"],
+      textarea {
+        flex: 1;
+        min-width: 200px;
+        padding: 12px 16px;
+        border: 2px solid #3a4a5f;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: "Inter", sans-serif;
+        background-color: #1a2332;
+        color: #e0e6ed;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      input[type="text"]:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #4f93ff;
+        background-color: #212d40;
+        box-shadow: 0 0 12px rgba(79, 147, 255, 0.2),
+          inset 0 0 0 1px rgba(79, 147, 255, 0.1);
+      }
+
+      input[type="date"]:focus {
+        outline: none;
+        border-color: #4f93ff;
+      }
+
+      select {
+        padding: 12px 16px;
+        border: 2px solid #3a4a5f;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: "Inter", sans-serif;
+        background-color: #1a2332;
+        color: #e0e6ed;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+      }
+
+      select:focus {
+        outline: none;
+        border-color: #4f93ff;
+        background-color: #212d40;
+        box-shadow: 0 0 12px rgba(79, 147, 255, 0.2),
+          inset 0 0 0 1px rgba(79, 147, 255, 0.1);
+      }
+
+      select option {
+        background-color: #1a2332;
+        color: #e0e6ed;
+      }
+
+      /* Task List */
+      .task-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .task-item {
+        background: linear-gradient(
+          135deg,
+          rgba(42, 58, 79, 0.6) 0%,
+          rgba(35, 50, 70, 0.4) 100%
+        );
+        border: 1px solid #3a4a5f;
+        border-radius: 10px;
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        backdrop-filter: blur(5px);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .task-item:hover {
+        border-color: #4f93ff;
+        background: linear-gradient(
+          135deg,
+          rgba(79, 147, 255, 0.08) 0%,
+          rgba(61, 122, 232, 0.05) 100%
+        );
+        box-shadow: 0 4px 16px rgba(79, 147, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .task-item.completed {
+        opacity: 0.6;
+        border-color: #3a4a5f;
+      }
+
+      .task-item.completed .task-text {
+        text-decoration: line-through;
+        color: #6a7583;
+      }
+
+      .task-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .task-title {
+        font-weight: 700;
+        color: #e0e6ed;
+        margin-bottom: 4px;
+        font-family: "Inter", sans-serif;
+        font-size: 15px;
+        letter-spacing: 0.2px;
+        word-break: break-word;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .task-description {
+        font-size: 13px;
+        color: #a0aab8;
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+
+      .task-meta {
+        font-size: 12px;
+        color: #7a8594;
+        font-weight: 500;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .task-type {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background: linear-gradient(135deg, #2a5f7f 0%, #1a4566 100%);
+        color: #7cb9ff;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        border: 1px solid #3a6f8f;
+        gap: 4px;
+      }
+
+      .task-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+
+      .task-actions button {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-height: 32px;
+      }
+
+      .checkbox {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        margin-right: 8px;
+        flex-shrink: 0;
+        accent-color: #4f93ff;
+        margin-top: 2px;
+      }
+
+      /* Sidebar - Stats Card */
+      .sidebar {
+        background: linear-gradient(
+          135deg,
+          rgba(26, 35, 50, 0.7) 0%,
+          rgba(20, 28, 40, 0.5) 100%
+        );
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid #2a3a4f;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .sidebar h3 {
+        font-size: 11px;
+        font-weight: 800;
+        color: #a0aab8;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .stat-item {
+        margin-bottom: 20px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #3a4a5f;
+      }
+
+      .stat-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: #a0aab8;
+        margin-bottom: 6px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #4f93ff 0%, #7cb9ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #a0aab8;
+        font-weight: 500;
+      }
+
+      .empty-state p {
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      /* Modal - Modern Dialog Style */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: linear-gradient(135deg, #0f1419 0%, #151d2b 100%);
+        border-radius: 12px;
+        padding: 28px;
+        width: 90%;
+        max-width: 520px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+        animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #2a3a4f;
+      }
+
+      .modal-header {
+        font-size: 20px;
+        font-weight: 700;
+        color: #e0e6ed;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: "Poppins", sans-serif;
+        letter-spacing: -0.3px;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #a0aab8;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .close-modal:hover {
+        color: #e0e6ed;
+        background-color: rgba(79, 147, 255, 0.1);
+      }
+
+      .modal-body {
+        margin-bottom: 24px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #e0e6ed;
+        font-family: "Inter", sans-serif;
+        letter-spacing: 0.3px;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+      }
+
+      .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      /* Email Preferences Section - Feature Card */
+      .email-preferences {
+        background: linear-gradient(
+          135deg,
+          rgba(26, 35, 50, 0.7) 0%,
+          rgba(20, 28, 40, 0.5) 100%
+        );
+        border-radius: 12px;
+        padding: 28px;
+        border: 1px solid #2a3a4f;
+        backdrop-filter: blur(10px);
+        margin-bottom: 40px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .email-preferences h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #e0e6ed;
+        margin-bottom: 20px;
+        font-family: "Poppins", sans-serif;
+        letter-spacing: -0.3px;
+      }
+
+      .email-preferences-content {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .email-input-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .email-input-group input {
+        flex: 1;
+        min-width: 250px;
+        padding: 12px 16px;
+        border: 2px solid #3a4a5f;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: "Inter", sans-serif;
+        background-color: #1a2332;
+        color: #e0e6ed;
+        font-weight: 400;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .email-input-group input:focus {
+        outline: none;
+        border-color: #4f93ff;
+        background-color: #212d40;
+        box-shadow: 0 0 12px rgba(79, 147, 255, 0.2);
+      }
+
+      .email-input-group button {
+        padding: 12px 24px;
+      }
+
+      .reminder-settings {
+        background: linear-gradient(
+          135deg,
+          rgba(15, 20, 25, 0.7) 0%,
+          rgba(10, 15, 25, 0.5) 100%
+        );
+        border: 1px solid #3a4a5f;
+        border-radius: 10px;
+        padding: 20px;
+      }
+
+      .reminder-settings h4 {
+        font-size: 12px;
+        font-weight: 800;
+        color: #a0aab8;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .reminder-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .reminder-option:last-child {
+        margin-bottom: 0;
+      }
+
+      .reminder-option input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #4f93ff;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .reminder-option label {
+        font-size: 13px;
+        color: #a0aab8;
+        cursor: pointer;
+        font-weight: 500;
+        margin: 0;
+      }
+
+      .email-status {
+        font-size: 13px;
+        color: #a0aab8;
+        padding: 14px 16px;
+        background: linear-gradient(
+          135deg,
+          rgba(15, 20, 25, 0.7) 0%,
+          rgba(10, 15, 25, 0.5) 100%
+        );
+        border-radius: 8px;
+        border-left: 4px solid #4f93ff;
+        margin-top: 20px;
+      }
+
+      .email-status.active {
+        border-left-color: #66bb6a;
+        color: #66bb6a;
+      }
+
+      @media (max-width: 768px) {
+        .email-preferences-content {
+          grid-template-columns: 1fr;
+        }
+
+        .email-input-group {
+          flex-direction: column;
+        }
+
+        .email-input-group input {
+          min-width: 100%;
+        }
+      }
+
+      footer {
+        background: linear-gradient(
+          180deg,
+          rgba(15, 20, 25, 0.5) 0%,
+          rgba(10, 15, 20, 0.8) 100%
+        );
+        border-top: 1px solid #2a3a4f;
+        padding: 40px 24px;
+        margin-top: 60px;
+        backdrop-filter: blur(10px);
+      }
+
+      .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 40px;
+      }
+
+      .footer-section h4 {
+        font-size: 12px;
+        font-weight: 800;
+        color: #e0e6ed;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        font-family: "Inter", sans-serif;
+      }
+
+      .footer-links {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: 14px;
+      }
+
+      .footer-links a {
+        color: #a0aab8;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+        font-family: "Inter", sans-serif;
+      }
+
+      .footer-links a:hover {
+        color: #7cb9ff;
+        transform: translateX(2px);
+      }
+
+      .social-links {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .social-links a {
+        display: inline-flex;
+        width: 40px;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          135deg,
+          rgba(26, 35, 50, 0.6) 0%,
+          rgba(20, 28, 40, 0.4) 100%
+        );
+        border-radius: 8px;
+        color: #a0aab8;
+        text-decoration: none;
+        font-size: 16px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #3a4a5f;
+      }
+
+      .social-links a:hover {
+        background: linear-gradient(135deg, #4f93ff 0%, #3d7ae8 100%);
+        color: #ffffff;
+        border-color: #4f93ff;
+        transform: translateY(-2px);
+      }
+
+      .footer-bottom {
+        max-width: 1400px;
+        margin: 40px auto 0;
+        padding-top: 28px;
+        border-top: 1px solid #2a3a4f;
+        text-align: center;
+        font-size: 13px;
+        color: #a0aab8;
+        font-family: "Inter", sans-serif;
+      }
+
+      .email-status {
+        margin-top: 16px;
+        display: none;
+      }
+
+      .empty-state-text {
+        font-size: 12px;
+      }
+
+      .wallet-address-display {
+        font-size: 13px;
+        color: #a0aab8;
+      }
+
+      .modal-description {
+        font-size: 14px;
+        color: #a0aab8;
+        margin-bottom: 20px;
+      }
+
+      .wallet-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .wallet-button {
+        padding: 16px;
+        text-align: center;
+        height: 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .wallet-icon {
+        font-size: 20px;
+        margin-bottom: 4px;
+      }
+
+      .readonly-input {
+        background-color: #1a2332;
+        color: #a0aab8;
+      }
+
+      .modal-description-compact {
+        font-size: 14px;
+        color: #a0aab8;
+        margin-bottom: 16px;
+      }
+
+      .footer-description {
+        font-size: 13px;
+        color: #a0aab8;
+        margin-bottom: 12px;
+      }
+
+      .creator-description {
+        font-size: 13px;
+        color: #a0aab8;
+        margin-bottom: 16px;
+      }
+
+      @media (max-width: 768px) {
+        header {
+          padding: 12px 16px;
+        }
+
+        .logo {
+          font-size: 20px;
+        }
+
+        .main-content {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+
+        .sidebar {
+          position: static;
+          top: auto;
+        }
+
+        .tasks-header {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 12px;
+        }
+
+        .input-group {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .task-item {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .task-actions {
+          width: 100%;
+          margin-top: 12px;
+        }
+
+        .task-actions button {
+          flex: 1;
+          min-height: 36px;
+        }
+
+        .welcome-section {
+          padding: 24px;
+        }
+
+        .welcome-section h1 {
+          font-size: 24px;
+        }
+
+        .container {
+          padding: 20px 16px;
+        }
+
+        .modal-content {
+          width: 95%;
+          max-width: 100%;
+          padding: 24px;
+        }
+
+        footer {
+          padding: 32px 16px;
+        }
+
+        .footer-content {
+          gap: 28px;
+          grid-template-columns: 1fr;
+        }
+
+        .email-preferences {
+          padding: 20px;
+        }
+
+        .email-preferences-content {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        header {
+          padding: 12px 14px;
+          gap: 12px;
+        }
+
+        .logo {
+          font-size: 18px;
+        }
+
+        .header-actions {
+          width: 100%;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .header-actions button {
+          padding: 8px 12px;
+          font-size: 12px;
+          min-height: 36px;
+        }
+
+        .welcome-section {
+          padding: 20px;
+        }
+
+        .welcome-section h1 {
+          font-size: 20px;
+        }
+
+        .welcome-section p {
+          font-size: 13px;
+        }
+
+        .tasks-section {
+          padding: 16px;
+          border-radius: 10px;
+        }
+
+        .sidebar {
+          padding: 16px;
+          border-radius: 10px;
+        }
+
+        .stats-item {
+          margin: 14px 0;
+        }
+
+        .stat-value {
+          font-size: 24px;
+        }
+
+        button {
+          padding: 8px 14px;
+          font-size: 12px;
+          min-height: 36px;
+        }
+
+        .container {
+          padding: 14px;
+          max-width: 100%;
+        }
+
+        .modal-content {
+          width: 98%;
+          padding: 20px;
+        }
+
+        .modal-header {
+          font-size: 18px;
+          margin-bottom: 16px;
+        }
+
+        .form-group {
+          margin-bottom: 14px;
+        }
+
+        .form-group label {
+          font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          font-size: 14px;
+          padding: 10px 12px;
+        }
+
+        footer {
+          padding: 24px 12px;
+          margin-top: 40px;
+        }
+
+        .footer-content {
+          gap: 24px;
+        }
+
+        .footer-section h4 {
+          font-size: 11px;
+        }
+
+        .footer-links a {
+          font-size: 13px;
+        }
+
+        .email-preferences {
+          padding: 16px;
+        }
+
+        .email-preferences h3 {
+          font-size: 16px;
+        }
+
+        .email-input-group {
+          gap: 10px;
+        }
+
+        .email-input-group input {
+          padding: 10px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <img src="ohh icon.jpeg" alt="ohh app logo" />
+        <span class="logo-text">ohh</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-secondary" id="bugReportBtn">🐛 Report Bug</button>
+        <button class="btn-secondary" id="supportBtn">💬 Support</button>
+        <button class="btn-primary" id="walletBtn">Connect Wallet</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="welcome-section">
+        <h1>Welcome to ohh</h1>
+        <p>
+          Remember your on-chain activities, never miss a staking or claiming
+          opportunity
+        </p>
+        <div class="wallet-status" id="walletStatus">Not Connected</div>
+      </div>
+
+      <!-- Email Preferences Section -->
+      <div class="email-preferences">
+        <h3>📧 Email Reminders</h3>
+        <div class="email-preferences-content">
+          <div class="email-input-group">
+            <input
+              type="email"
+              id="userEmail"
+              placeholder="Enter your email address"
+              title="We'll send you task reminders"
+            />
+            <button class="btn-primary" id="saveEmailBtn">Save Email</button>
+          </div>
+          <div class="reminder-settings">
+            <h4>⏰ Reminder Settings</h4>
+            <div class="reminder-option">
+              <input type="checkbox" id="remindBefore" checked />
+              <label for="remindBefore">Remind 1 day before</label>
+            </div>
+            <div class="reminder-option">
+              <input type="checkbox" id="remindOnDay" checked />
+              <label for="remindOnDay">Remind on due date</label>
+            </div>
+            <div class="reminder-option">
+              <input type="checkbox" id="remindAfter" checked />
+              <label for="remindAfter">Remind if not completed</label>
+            </div>
+          </div>
+        </div>
+        <div class="email-status" id="emailStatus">✅ Email not set yet</div>
+      </div>
+
+      <div class="main-content">
+        <div class="tasks-section">
+          <div class="tasks-header">
+            <h2>My Tasks</h2>
+            <div class="tasks-controls">
+              <div class="search-box">
+                <span>🔍</span>
+                <input type="text" id="searchTasks" placeholder="Search tasks..." />
+              </div>
+              <button class="filter-btn" id="filterBtn" title="Filter tasks">📋 Filter</button>
+              <button class="sort-btn" id="sortBtn" title="Sort tasks">↑↓ Sort</button>
+              <button class="btn-primary" id="addTaskBtn">+ Add Task</button>
+            </div>
+          </div>
+
+          <div class="input-group" id="quickAddGroup" hidden>
+            <input type="text" id="quickTaskInput" placeholder="Task name..." />
+            <textarea
+              id="quickTaskDesc"
+              placeholder="Description (optional)"
+              rows="2"
+            ></textarea>
+            <select id="quickTaskType" title="Select task type">
+              <option value="reminder">Reminder</option>
+              <option value="claiming">Claiming</option>
+              <option value="staking">Staking</option>
+              <option value="other">Other</option>
+            </select>
+            <button class="btn-primary" id="quickAddConfirmBtn">Add</button>
+            <button class="btn-secondary" id="quickAddCancelBtn">Cancel</button>
+          </div>
+
+          <ul class="task-list" id="taskList">
+            <li class="empty-state">
+              <p>No tasks yet. Create your first task to get started!</p>
+              <p class="empty-state-text">Click "Add Task" above to begin</p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar">
+          <h3>📊 Stats</h3>
+          <div class="stat-item">
+            <div class="stat-label">Total Tasks</div>
+            <div class="stat-value" id="totalTasks">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value" id="completedTasks">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value" id="pendingTasks">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Completion</div>
+            <div class="stat-value" id="completionRate">0%</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Wallet</div>
+            <div class="stat-value wallet-address-display" id="walletAddress">
+              -
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="walletModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Connect Your Wallet</span>
+          <button
+            class="close-modal"
+            onclick="document.getElementById('walletModal').classList.remove('active')"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">Select your wallet to connect:</p>
+          <div class="wallet-grid">
+            <button
+              class="btn-secondary wallet-button"
+              id="evmWalletBtn"
+              title="Connect EVM Wallet"
+            >
+              <div class="wallet-icon">🔗</div>
+              <div>EVM Wallet</div>
+            </button>
+            <button
+              class="btn-secondary wallet-button"
+              id="svmWalletBtn"
+              title="Connect Solana Wallet"
+            >
+              <div class="wallet-icon">⚡</div>
+              <div>Solana Wallet</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="addTaskModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Create New Task</span>
+          <button
+            class="close-modal"
+            onclick="document.getElementById('addTaskModal').classList.remove('active')"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Task Title *</label>
+            <input
+              type="text"
+              id="modalTaskName"
+              placeholder="e.g., Claim rewards on Uniswap"
+            />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              id="modalTaskDesc"
+              placeholder="Add details about your task"
+              rows="2"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="modalTaskType">Task Type *</label>
+            <select id="modalTaskType" title="Select task type">
+              <option value="reminder">📌 Reminder</option>
+              <option value="claiming">🎁 Claiming</option>
+              <option value="staking">💰 Staking</option>
+              <option value="other">📝 Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modalTaskChain">Chain *</label>
+            <select id="modalTaskChain" title="Select blockchain">
+              <option value="">Select Chain...</option>
+              <option value="ethereum">Ethereum (EVM)</option>
+              <option value="polygon">Polygon (EVM)</option>
+              <option value="bsc">Binance Smart Chain (EVM)</option>
+              <option value="arbitrum">Arbitrum (EVM)</option>
+              <option value="optimism">Optimism (EVM)</option>
+              <option value="avalanche">Avalanche (EVM)</option>
+              <option value="fantom">Fantom (EVM)</option>
+              <option value="base">Base (EVM)</option>
+              <option value="solana">Solana (SVM)</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modalTaskProtocol">Protocol/DApp *</label>
+            <select id="modalTaskProtocol" title="Select protocol or DApp">
+              <option value="">Select Protocol...</option>
+              <option value="uniswap">Uniswap</option>
+              <option value="aave">Aave</option>
+              <option value="curve">Curve Finance</option>
+              <option value="lido">Lido</option>
+              <option value="opensea">OpenSea</option>
+              <option value="compound">Compound</option>
+              <option value="raydium">Raydium</option>
+              <option value="magic-eden">Magic Eden</option>
+              <option value="stake-pool">Stake Pool</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modalTaskDueDate">Due Date (Optional)</label>
+            <input
+              type="date"
+              id="modalTaskDueDate"
+              title="Set task due date"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="document.getElementById('addTaskModal').classList.remove('active')"
+          >
+            Cancel
+          </button>
+          <button class="btn-primary" id="createTaskBtn">Create Task</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="supportModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Customer Support</span>
+          <button
+            class="close-modal"
+            onclick="document.getElementById('supportModal').classList.remove('active')"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">Need help? Reach out to us:</p>
+          <div class="form-group">
+            <label for="supportEmail">Email</label>
+            <input
+              type="text"
+              id="supportEmail"
+              value="oohapps9@gmail.com"
+              readonly
+              class="readonly-input"
+              title="Support email address"
+            />
+          </div>
+          <div class="form-group">
+            <label>Subject</label>
+            <input
+              type="text"
+              id="supportSubject"
+              placeholder="What do you need help with?"
+            />
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea
+              id="supportMessage"
+              placeholder="Describe your issue in detail"
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="document.getElementById('supportModal').classList.remove('active')"
+          >
+            Close
+          </button>
+          <button class="btn-primary" id="sendSupportBtn">Send Email</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="bugReportModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Report a Bug</span>
+          <button
+            class="close-modal"
+            onclick="document.getElementById('bugReportModal').classList.remove('active')"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description-compact">
+            Help us improve ohh by reporting bugs:
+          </p>
+          <div class="form-group">
+            <label for="bugEmail">Email</label>
+            <input
+              type="text"
+              id="bugEmail"
+              value="oohapps9@gmail.com"
+              readonly
+              class="readonly-input"
+              title="Bug report email address"
+            />
+          </div>
+          <div class="form-group">
+            <label>Bug Title *</label>
+            <input
+              type="text"
+              id="bugTitle"
+              placeholder="Brief description of the bug"
+            />
+          </div>
+          <div class="form-group">
+            <label>Description *</label>
+            <textarea
+              id="bugDescription"
+              placeholder="Steps to reproduce, expected vs actual behavior"
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="document.getElementById('bugReportModal').classList.remove('active')"
+          >
+            Close
+          </button>
+          <button class="btn-primary" id="sendBugBtn">Send Report</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>About ohh</h4>
+          <p class="footer-description">
+            A simple, elegant task manager for Web3 users. Remember your
+            on-chain activities and never miss a claiming or staking
+            opportunity.
+          </p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li>
+              <a
+                href="#"
+                onclick="document.getElementById('supportModal').classList.add('active'); return false;"
+                >Support</a
+              >
+            </li>
+            <li>
+              <a
+                href="#"
+                onclick="document.getElementById('bugReportModal').classList.add('active'); return false;"
+                >Report Bug</a
+              >
+            </li>
+            <li>
+              <a href="#" onclick="alert('Privacy Policy coming soon')"
+                >Privacy Policy</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Built by mubz.24</h4>
+          <p class="creator-description">
+            A Web3 enthusiast creating tools for the crypto community.
+          </p>
+          <div class="social-links">
+            <a
+              href="https://x.com/24Tryn"
+              target="_blank"
+              rel="noopener"
+              title="Twitter"
+              >𝕏</a
+            >
+            <a
+              href="https://t.me/tryn24"
+              target="_blank"
+              rel="noopener"
+              title="Telegram"
+              >✈️</a
+            >
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 ohh - Web3 Task Manager. Made with ❤️ by mubz.24</p>
+      </div>
+    </footer>
+
+    <script src="./ohh.jsx"></script>
+  </body>
+</html>

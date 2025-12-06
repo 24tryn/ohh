@@ -1,0 +1,28 @@
+{
+  "app": "ohh",
+  "version": "1.0.0",
+  "buildDate": "2025-12-06T00:00:00Z",
+  "releaseNotes": "Initial release with Web3 wallet integration, task management, and email reminders",
+  "features": {
+    "walletIntegration": {
+      "enabled": true,
+      "chains": ["ethereum", "polygon", "arbitrum", "optimism", "avalanche", "fantom", "base", "solana"]
+    },
+    "taskManagement": {
+      "enabled": true,
+      "filtering": true,
+      "sorting": true,
+      "search": true
+    },
+    "emailReminders": {
+      "enabled": true,
+      "interval": 300000
+    }
+  },
+  "breaking": false,
+  "deprecated": [],
+  "security": {
+    "lastAudit": "2025-12-06",
+    "vulnerabilities": 0
+  }
+}

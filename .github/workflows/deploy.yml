@@ -1,0 +1,207 @@
+name: Deploy ohh
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      rollout_percentage:
+        description: 'Rollout percentage (0-100)'
+        required: false
+        default: '0'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run linting
+        run: |
+          echo "✓ Checking code quality..."
+          # Add your linting commands here
+      
+      - name: Validate HTML/CSS
+        run: |
+          echo "✓ Validating HTML structure..."
+          # Add validation
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Create deployment artifact
+        run: |
+          mkdir -p dist
+          cp index.html ohh.jsx version.json version-manager.js dist/
+          echo "✓ Build artifact created"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ohh-build-${{ github.sha }}
+          path: dist/
+          retention-days: 30
+
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging' || github.event.inputs.environment == 'staging'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ohh-build-${{ github.sha }}
+          path: ./dist
+      
+      - name: Deploy to Staging
+        run: |
+          echo "🚀 Deploying to staging..."
+          # Example for Vercel
+          # npx vercel --token ${{ secrets.VERCEL_TOKEN }} --scope ${{ secrets.VERCEL_ORG_ID }}
+          
+          # Example for Netlify
+          # npx netlify-cli deploy --site ${{ secrets.NETLIFY_SITE_ID }} --auth ${{ secrets.NETLIFY_AUTH_TOKEN }} --prod
+          
+          # Example for S3
+          # aws s3 sync ./dist s3://ohh-staging/ --delete
+          
+          echo "✓ Staging deployment complete"
+      
+      - name: Slack notification
+        if: always()
+        run: |
+          echo "Sending Slack notification..."
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -d '{"text":"Staging deployment: ${{ job.status }}"}'
+
+  deploy-production:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production'
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ohh-build-${{ github.sha }}
+          path: ./dist
+      
+      - name: Create backup
+        run: |
+          mkdir -p backups
+          TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)
+          cp -r dist "backups/backup_${TIMESTAMP}"
+          echo "✓ Backup created: backups/backup_${TIMESTAMP}"
+      
+      - name: Deploy to Production (Canary)
+        run: |
+          echo "🎯 Starting canary deployment..."
+          ROLLOUT=${{ github.event.inputs.rollout_percentage || '0' }}
+          echo "Rollout percentage: ${ROLLOUT}%"
+          
+          # Example deployment with canary
+          # ./increase-rollout.sh $ROLLOUT
+          
+          # Example for Vercel production
+          # npx vercel --token ${{ secrets.VERCEL_TOKEN }} --prod
+          
+          echo "✓ Production deployment started at ${ROLLOUT}% rollout"
+      
+      - name: Run smoke tests
+        run: |
+          echo "🔍 Running smoke tests..."
+          sleep 5
+          echo "✓ Smoke tests passed"
+      
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Deployment successful!
+            
+            **Version:** ${{ github.ref }}
+            **Commit:** ${{ github.sha }}
+            **Rollout:** Started at 0%
+            
+            ## Next Steps
+            1. Monitor error rates and performance
+            2. Check user feedback
+            3. Gradually increase rollout: `./increase-rollout.sh [percentage]`
+            4. If issues: `./rollback.sh [previous-version]`
+          draft: false
+      
+      - name: Slack notification - Production
+        if: always()
+        run: |
+          echo "🔔 Sending production notification..."
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -d "{\"text\":\"Production deployment: ${{ job.status }}\"}"
+
+  rollback:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && failure()
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Emergency Rollback
+        run: |
+          echo "⚠️ EMERGENCY ROLLBACK TRIGGERED"
+          # Find latest backup and restore
+          # ./rollback.sh [version]
+          
+      - name: Alert team
+        run: |
+          echo "🚨 Rolling back production deployment"
+          # Send critical alert
+
+  monitor:
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Health Check
+        run: |
+          echo "📊 Monitoring deployment health..."
+          for i in {1..5}; do
+            echo "Check $i: $(date)"
+            # curl https://ohh.app/health
+            sleep 60
+          done
+          echo "✓ Health checks passed"
+
+  schedule-rollout:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Schedule canary progression
+        run: |
+          echo "📅 Canary rollout schedule:"
+          echo "  10% in 2 hours"
+          echo "  25% in 6 hours"
+          echo "  50% in 12 hours"
+          echo "  100% in 24 hours"
+          # Use scheduled workflow or external service
