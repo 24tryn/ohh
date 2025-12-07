@@ -384,12 +384,6 @@ class OhhTaskManager {
         statusEl.textContent = '👤 No wallet selected';
         statusEl.classList.remove('connected');
     }
-            type: null
-        };
-        localStorage.removeItem('ohhWallet');
-        this.updateWalletUI();
-        alert('✅ Wallet disconnected');
-    }
 
     shortenAddress(address) {
         if (!address) return '';
@@ -1012,4 +1006,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Note: Old wallet connection listeners removed
     // The app now uses a safe manual wallet address input instead
 });
-
