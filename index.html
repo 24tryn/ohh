@@ -61,6 +61,48 @@
         border-bottom: 1px solid rgba(224, 230, 237, 0.1);
       }
 
+      .wallet-input-container {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .wallet-button-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .wallet-button-flex {
+        flex: 1;
+      }
+
+      .wallet-privacy-notice {
+        font-size: 12px;
+        color: #7a8fa6;
+        margin-top: 8px;
+        line-height: 1.4;
+      }
+
+      .saved-wallets-title {
+        margin-bottom: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #4f93ff;
+      }
+
+      .saved-wallets-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .saved-wallets-empty {
+        font-size: 13px;
+        color: #7a8fa6;
+        text-align: center;
+        padding: 20px 0;
+      }
+
       html,
       body {
         width: 100%;
@@ -1092,6 +1134,54 @@
         margin-bottom: 16px;
       }
 
+      /* Wallet Modal Styles - Moved from inline */
+      .wallet-input-flex-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .wallet-input-field {
+        flex: 1;
+        padding: 10px 12px;
+        background: rgba(79, 147, 255, 0.05);
+        border: 1px solid rgba(79, 147, 255, 0.2);
+        border-radius: 8px;
+        color: #e0e6ed;
+        font-size: 13px;
+      }
+
+      .wallet-button-flex {
+        flex: 1;
+      }
+
+      .wallet-privacy-note {
+        font-size: 12px;
+        color: #7a8fa6;
+        margin-top: 8px;
+        line-height: 1.4;
+      }
+
+      .saved-wallets-title-style {
+        margin-bottom: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #4f93ff;
+      }
+
+      .saved-wallets-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .saved-wallets-empty-message {
+        font-size: 13px;
+        color: #7a8fa6;
+        text-align: center;
+        padding: 20px 0;
+      }
+
       @media (max-width: 768px) {
         header {
           padding: 12px 16px;
@@ -1435,36 +1525,36 @@
           <!-- Add New Wallet Section -->
           <div class="wallet-add-section">
             <h4 class="wallet-add-title">Add New Wallet</h4>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <div class="wallet-input-flex-row">
               <input
                 type="text"
                 id="walletAddress"
                 placeholder="Paste wallet address (0x...)"
-                style="flex: 1; padding: 10px 12px; background: rgba(79, 147, 255, 0.05); border: 1px solid rgba(79, 147, 255, 0.2); border-radius: 8px; color: #e0e6ed; font-size: 13px;"
+                class="wallet-input-field"
               />
             </div>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <div class="wallet-input-flex-row">
               <input
                 type="text"
                 id="walletName"
                 placeholder="Give it a name (e.g., My Ethereum Wallet)"
-                style="flex: 1; padding: 10px 12px; background: rgba(79, 147, 255, 0.05); border: 1px solid rgba(79, 147, 255, 0.2); border-radius: 8px; color: #e0e6ed; font-size: 13px;"
+                class="wallet-input-field"
               />
             </div>
-            <div style="display: flex; gap: 8px;">
-              <button class="btn-primary" id="addWalletBtn" style="flex: 1;">➕ Add Wallet</button>
-              <button class="btn-secondary" id="validateWalletBtn" style="flex: 1;">✓ Validate</button>
+            <div class="wallet-input-flex-row">
+              <button class="btn-primary wallet-button-flex" id="addWalletBtn">➕ Add Wallet</button>
+              <button class="btn-secondary wallet-button-flex" id="validateWalletBtn">✓ Validate</button>
             </div>
-            <p style="font-size: 12px; color: #7a8fa6; margin-top: 8px; line-height: 1.4;">
+            <p class="wallet-privacy-note">
               💡 <strong>Safe & Private:</strong> Your addresses are stored locally in your browser. We never connect to or access your wallets.
             </p>
           </div>
 
           <!-- Saved Wallets List -->
           <div>
-            <h4 style="margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #4f93ff;">Saved Wallets</h4>
-            <div id="savedWalletsList" style="display: flex; flex-direction: column; gap: 8px;">
-              <p style="font-size: 13px; color: #7a8fa6; text-align: center; padding: 20px 0;">
+            <h4 class="saved-wallets-title-style">Saved Wallets</h4>
+            <div id="savedWalletsList" class="saved-wallets-list-container">
+              <p class="saved-wallets-empty-message">
                 No wallets saved yet. Add one above!
               </p>
             </div>
@@ -1523,6 +1613,7 @@
               <option value="fantom">Fantom (EVM)</option>
               <option value="base">Base (EVM)</option>
               <option value="solana">Solana (SVM)</option>
+              <option value="monad">Monad (EVM)</option>
               <option value="other">Other</option>
             </select>
           </div>
