@@ -1272,7 +1272,7 @@
       <div class="header-actions">
         <button class="btn-secondary" id="bugReportBtn">🐛 Report Bug</button>
         <button class="btn-secondary" id="supportBtn">💬 Support</button>
-        <button class="btn-primary" id="walletBtn">Connect Wallet</button>
+        <button class="btn-primary" id="myWalletsBtn">👛 My Wallets</button>
       </div>
     </header>
 
@@ -1387,36 +1387,54 @@
     </div>
 
     <!-- Modals -->
-    <div class="modal" id="walletModal">
-      <div class="modal-content">
+    <div class="modal" id="walletsModal">
+      <div class="modal-content" style="max-width: 500px;">
         <div class="modal-header">
-          <span>Connect Your Wallet</span>
+          <span>👛 My Wallets</span>
           <button
             class="close-modal"
-            onclick="document.getElementById('walletModal').classList.remove('active')"
+            onclick="document.getElementById('walletsModal').classList.remove('active')"
           >
             ×
           </button>
         </div>
         <div class="modal-body">
-          <p class="modal-description">Select your wallet to connect:</p>
-          <div class="wallet-grid">
-            <button
-              class="btn-secondary wallet-button"
-              id="evmWalletBtn"
-              title="Connect EVM Wallet"
-            >
-              <div class="wallet-icon">🔗</div>
-              <div>EVM Wallet</div>
-            </button>
-            <button
-              class="btn-secondary wallet-button"
-              id="svmWalletBtn"
-              title="Connect Solana Wallet"
-            >
-              <div class="wallet-icon">⚡</div>
-              <div>Solana Wallet</div>
-            </button>
+          <!-- Add New Wallet Section -->
+          <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid rgba(224, 230, 237, 0.1);">
+            <h4 style="margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #4f93ff;">Add New Wallet</h4>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <input
+                type="text"
+                id="walletAddress"
+                placeholder="Paste wallet address (0x...)"
+                style="flex: 1; padding: 10px 12px; background: rgba(79, 147, 255, 0.05); border: 1px solid rgba(79, 147, 255, 0.2); border-radius: 8px; color: #e0e6ed; font-size: 13px;"
+              />
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <input
+                type="text"
+                id="walletName"
+                placeholder="Give it a name (e.g., My Ethereum Wallet)"
+                style="flex: 1; padding: 10px 12px; background: rgba(79, 147, 255, 0.05); border: 1px solid rgba(79, 147, 255, 0.2); border-radius: 8px; color: #e0e6ed; font-size: 13px;"
+              />
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-primary" id="addWalletBtn" style="flex: 1;">➕ Add Wallet</button>
+              <button class="btn-secondary" id="validateWalletBtn" style="flex: 1;">✓ Validate</button>
+            </div>
+            <p style="font-size: 12px; color: #7a8fa6; margin-top: 8px; line-height: 1.4;">
+              💡 <strong>Safe & Private:</strong> Your addresses are stored locally in your browser. We never connect to or access your wallets.
+            </p>
+          </div>
+
+          <!-- Saved Wallets List -->
+          <div>
+            <h4 style="margin-bottom: 12px; font-size: 14px; font-weight: 600; color: #4f93ff;">Saved Wallets</h4>
+            <div id="savedWalletsList" style="display: flex; flex-direction: column; gap: 8px;">
+              <p style="font-size: 13px; color: #7a8fa6; text-align: center; padding: 20px 0;">
+                No wallets saved yet. Add one above!
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -7,6 +7,8 @@ class OhhTaskManager {
         this.userEmail = this.loadUserEmail();
         this.reminderSettings = this.loadReminderSettings();
         this.usageStats = this.loadUsageStats();
+        this.wallets = this.loadWallets();
+        this.currentWalletId = null;
         this.wallet = {
             connected: false,
             address: null,
@@ -25,8 +27,8 @@ class OhhTaskManager {
         this.setupEventListeners();
         this.renderTasks();
         this.updateStats();
-        this.checkWalletConnection();
         this.updateEmailStatus();
+        this.renderSavedWallets();
         this.startReminderChecker();
     }
 
@@ -74,17 +76,26 @@ class OhhTaskManager {
             this.saveReminderSettings();
         });
 
-        // Wallet Connection
-        document.getElementById('walletBtn').addEventListener('click', () => {
-            document.getElementById('walletModal').classList.add('active');
+        // Wallet Management
+        document.getElementById('myWalletsBtn').addEventListener('click', () => {
+            document.getElementById('walletsModal').classList.add('active');
         });
 
-        document.getElementById('evmWalletBtn').addEventListener('click', () => {
-            this.connectEVMWallet();
+        document.getElementById('addWalletBtn').addEventListener('click', () => {
+            this.addNewWallet();
         });
 
-        document.getElementById('svmWalletBtn').addEventListener('click', () => {
-            this.connectSVMWallet();
+        document.getElementById('validateWalletBtn').addEventListener('click', () => {
+            this.validateWalletAddress();
+        });
+
+        // Allow Enter key to add wallet
+        document.getElementById('walletAddress').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.addNewWallet();
+        });
+
+        document.getElementById('walletName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.addNewWallet();
         });
 
         // Task Management
@@ -176,107 +187,203 @@ class OhhTaskManager {
         this.renderTasks();
     }
 
-    // ========== WALLET CONNECTION ==========
-    async connectEVMWallet() {
-        try {
-            if (typeof window.ethereum === 'undefined') {
-                alert('Please install MetaMask or another EVM wallet extension!');
-                return;
-            }
+    // ========== SAFE WALLET MANAGEMENT ==========
+    
+    /**
+     * Add a new wallet address safely
+     * No connection to blockchain - just storing the address locally
+     */
+    addNewWallet() {
+        const address = document.getElementById('walletAddress').value.trim();
+        const name = document.getElementById('walletName').value.trim();
 
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        // Validate inputs
+        if (!address) {
+            alert('❌ Please enter a wallet address');
+            return;
+        }
 
-            this.wallet.connected = true;
-            this.wallet.address = accounts[0];
-            this.wallet.network = `0x${chainId}`;
-            this.wallet.type = 'evm';
-            this.trackWalletConnection();
+        if (!name) {
+            alert('❌ Please give your wallet a name');
+            return;
+        }
 
-            this.saveWalletState();
-            this.updateWalletUI();
-            document.getElementById('walletModal').classList.remove('active');
+        // Basic Ethereum address validation (0x + 40 hex characters)
+        const isEthAddress = /^0x[a-fA-F0-9]{40}$/.test(address);
+        // Basic Solana address validation (44 base58 characters)
+        const isSolanaAddress = /^[1-9A-HJ-NP-Z]{44}$/.test(address);
 
-            alert(`✅ Connected to MetaMask!\nAddress: ${this.shortenAddress(accounts[0])}`);
-        } catch (error) {
-            if (error.code === -32002) {
-                alert('⚠️ MetaMask request already pending. Please check your wallet.');
-            } else if (error.code !== 4001) {
-                alert('❌ Failed to connect MetaMask: ' + error.message);
-            }
+        if (!isEthAddress && !isSolanaAddress) {
+            alert('❌ Invalid wallet address. Please enter a valid Ethereum (0x...) or Solana address');
+            return;
+        }
+
+        // Check if address already exists
+        if (this.wallets.some(w => w.address.toLowerCase() === address.toLowerCase())) {
+            alert('⚠️ This wallet address is already saved');
+            return;
+        }
+
+        // Create new wallet object
+        const walletId = Date.now();
+        const newWallet = {
+            id: walletId,
+            address: address,
+            name: name,
+            type: isEthAddress ? 'ethereum' : 'solana',
+            addedAt: new Date().toISOString(),
+            notes: ''
+        };
+
+        // Add to list
+        this.wallets.push(newWallet);
+        this.saveWallets();
+        this.renderSavedWallets();
+
+        // Clear inputs
+        document.getElementById('walletAddress').value = '';
+        document.getElementById('walletName').value = '';
+
+        // Show success message
+        this.showInAppNotification(`✅ Wallet \"${name}\" added successfully!`);
+    }
+
+    /**
+     * Validate wallet address format
+     */
+    validateWalletAddress() {
+        const address = document.getElementById('walletAddress').value.trim();
+
+        if (!address) {
+            alert('❌ Please enter a wallet address');
+            return;
+        }
+
+        const isEthAddress = /^0x[a-fA-F0-9]{40}$/.test(address);
+        const isSolanaAddress = /^[1-9A-HJ-NP-Z]{44}$/.test(address);
+
+        if (isEthAddress) {
+            alert(`✅ Valid Ethereum address\nChecksum: ${address.substring(0, 6)}...${address.substring(38)}`);
+        } else if (isSolanaAddress) {
+            alert(`✅ Valid Solana address\nStart: ${address.substring(0, 6)}\nEnd: ...${address.substring(38)}`);
+        } else {
+            alert('❌ Invalid address format');
         }
     }
 
-    async connectSVMWallet() {
-        try {
-            // Check for Phantom wallet (most popular Solana wallet)
-            if (typeof window.solana === 'undefined') {
-                // Fallback to other Solana wallet adapters
-                const walletName = prompt('Enter your Solana wallet (Phantom, Magic Eden, etc.):');
-                if (!walletName) return;
-                
-                // Simulate connection for demo
-                this.wallet.connected = true;
-                this.wallet.address = 'SolanaWalletDemo123456789';
-                this.wallet.network = 'solana-mainnet';
-                this.wallet.type = 'svm';
-            } else {
-                // Connect Phantom
-                const resp = await window.solana.connect();
-                this.wallet.connected = true;
-                this.wallet.address = resp.publicKey.toString();
-                this.wallet.network = 'solana-mainnet';
-                this.wallet.type = 'svm';
-            }
+    /**
+     * Delete a saved wallet
+     */
+    deleteWallet(walletId) {
+        const wallet = this.wallets.find(w => w.id === walletId);
+        if (!wallet) return;
 
-            this.saveWalletState();
-            this.updateWalletUI();
-            document.getElementById('walletModal').classList.remove('active');
-
-            alert(`✅ Connected to Solana Wallet!\nAddress: ${this.shortenAddress(this.wallet.address)}`);
-        } catch (error) {
-            alert('❌ Failed to connect Solana wallet: ' + (error.message || 'Unknown error'));
+        if (confirm(`Delete wallet \"${wallet.name}\"? This action cannot be undone.`)) {
+            this.wallets = this.wallets.filter(w => w.id !== walletId);
+            this.saveWallets();
+            this.renderSavedWallets();
+            this.showInAppNotification(`🗑️ Wallet \"${wallet.name}\" deleted`);
         }
     }
 
-    checkWalletConnection() {
-        const savedWallet = localStorage.getItem('ohhWallet');
-        if (savedWallet) {
-            const parsed = JSON.parse(savedWallet);
-            this.wallet = parsed;
-            this.updateWalletUI();
+    /**
+     * Render saved wallets list
+     */
+    renderSavedWallets() {
+        const container = document.getElementById('savedWalletsList');
+        
+        if (this.wallets.length === 0) {
+            container.innerHTML = '<p style=\"font-size: 13px; color: #7a8fa6; text-align: center; padding: 20px 0;\">No wallets saved yet. Add one above!</p>';
+            return;
         }
+
+        container.innerHTML = this.wallets.map(wallet => `
+            <div style="
+                background: rgba(79, 147, 255, 0.05);
+                border: 1px solid rgba(79, 147, 255, 0.15);
+                border-radius: 8px;
+                padding: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <div style=\"flex: 1;\">
+                    <div style=\"font-weight: 600; font-size: 13px; color: #e0e6ed; margin-bottom: 4px;\">
+                        ${wallet.type === 'ethereum' ? '🔗' : '⚡'} ${wallet.name}
+                    </div>
+                    <div style=\"font-size: 11px; color: #7a8fa6; font-family: monospace; word-break: break-all;\">
+                        ${wallet.address.substring(0, 12)}...${wallet.address.substring(wallet.address.length - 10)}
+                    </div>
+                </div>
+                <div style=\"display: flex; gap: 4px; margin-left: 12px;\">
+                    <button 
+                        onclick="ohhManager.selectWallet(${wallet.id})"
+                        style=\"padding: 6px 10px; font-size: 12px; background: rgba(79, 147, 255, 0.1); border: 1px solid #4f93ff; border-radius: 4px; color: #4f93ff; cursor: pointer; font-weight: 500; transition: all 0.2s ease;\"
+                        onmouseover=\"this.style.background='rgba(79, 147, 255, 0.2)'\"
+                        onmouseout=\"this.style.background='rgba(79, 147, 255, 0.1)'\">
+                        Select
+                    </button>
+                    <button 
+                        onclick=\"ohhManager.deleteWallet(${wallet.id})\"
+                        style=\"padding: 6px 10px; font-size: 12px; background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.3); border-radius: 4px; color: #ff6b6b; cursor: pointer; font-weight: 500; transition: all 0.2s ease;\"
+                        onmouseover=\"this.style.background='rgba(220, 53, 69, 0.2)'\"
+                        onmouseout=\"this.style.background='rgba(220, 53, 69, 0.1)'\">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    saveWalletState() {
-        localStorage.setItem('ohhWallet', JSON.stringify(this.wallet));
+    /**
+     * Select a wallet as active
+     */
+    selectWallet(walletId) {
+        const wallet = this.wallets.find(w => w.id === walletId);
+        if (!wallet) return;
+
+        this.currentWalletId = walletId;
+        this.wallet.address = wallet.address;
+        this.wallet.connected = true;
+        this.wallet.type = wallet.type;
+        
+        this.updateWalletUI();
+        this.showInAppNotification(`✅ Selected \"${wallet.name}\"`);
     }
 
+    /**
+     * Load wallets from localStorage
+     */
+    loadWallets() {
+        const stored = localStorage.getItem('ohhWallets');
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    /**
+     * Save wallets to localStorage
+     */
+    saveWallets() {
+        localStorage.setItem('ohhWallets', JSON.stringify(this.wallets));
+    }
+
+    /**
+     * Update wallet UI to show current selection
+     */
     updateWalletUI() {
         const statusEl = document.getElementById('walletStatus');
-        const addressEl = document.getElementById('walletAddress');
-        const walletBtn = document.getElementById('walletBtn');
-
-        if (this.wallet.connected) {
-            statusEl.textContent = `✅ Connected (${this.wallet.type.toUpperCase()})`;
-            statusEl.classList.add('connected');
-            addressEl.textContent = this.shortenAddress(this.wallet.address);
-            walletBtn.textContent = `🔌 Disconnect`;
-            walletBtn.onclick = () => this.disconnectWallet();
-        } else {
-            statusEl.textContent = 'Not Connected';
-            statusEl.classList.remove('connected');
-            addressEl.textContent = '-';
-            walletBtn.textContent = `Connect Wallet`;
-            walletBtn.onclick = () => document.getElementById('walletModal').classList.add('active');
+        
+        if (this.wallet.connected && this.currentWalletId) {
+            const wallet = this.wallets.find(w => w.id === this.currentWalletId);
+            if (wallet) {
+                statusEl.innerHTML = `✅ Using: <strong>${wallet.name}</strong><br><small style="color: #7a8fa6; font-family: monospace;">${wallet.address.substring(0, 10)}...${wallet.address.substring(wallet.address.length - 8)}</small>`;
+                statusEl.classList.add('connected');
+                return;
+            }
         }
+        
+        statusEl.textContent = '👤 No wallet selected';
+        statusEl.classList.remove('connected');
     }
-
-    disconnectWallet() {
-        this.wallet = {
-            connected: false,
-            address: null,
-            network: null,
             type: null
         };
         localStorage.removeItem('ohhWallet');
@@ -902,28 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listen to wallet changes
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length === 0) {
-                ohhManager.disconnectWallet();
-            } else {
-                ohhManager.wallet.address = accounts[0];
-                ohhManager.saveWalletState();
-                ohhManager.updateWalletUI();
-            }
-        });
-
-        window.ethereum.on('chainChanged', (chainId) => {
-            ohhManager.wallet.network = chainId;
-            ohhManager.saveWalletState();
-        });
-    }
-
-    // Listen to Solana wallet disconnect
-    if (window.solana) {
-        window.solana.on('disconnect', () => {
-            ohhManager.disconnectWallet();
-        });
-    }
+    // Note: Old wallet connection listeners removed
+    // The app now uses a safe manual wallet address input instead
 });
+
