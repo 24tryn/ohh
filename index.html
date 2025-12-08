@@ -1396,7 +1396,7 @@
       <div class="header-actions">
         <button class="btn-secondary" id="bugReportBtn">🐛 Report Bug</button>
         <button class="btn-secondary" id="supportBtn">💬 Support</button>
-        <button class="btn-primary" id="myWalletsBtn">👛 My Wallets</button>
+        <button class="btn-primary wallet-button-flex" id="myWalletsBtn">👛 My Wallets</button>
       </div>
     </header>
 
@@ -1542,8 +1542,7 @@
               />
             </div>
             <div class="wallet-input-flex-row">
-              <button class="btn-primary wallet-button-flex" id="addWalletBtn">➕ Add Wallet</button>
-              <button class="btn-secondary wallet-button-flex" id="validateWalletBtn">✓ Validate</button>
+              <button class="btn-primary wallet-button-flex" id="addWalletBtn" onclick="ohhManager.addNewWallet()">➕ Add Wallet</button>
             </div>
             <p class="wallet-privacy-note">
               💡 <strong>Safe & Private:</strong> Your addresses are stored locally in your browser. We never connect to or access your wallets.
@@ -1672,7 +1671,7 @@
             <input
               type="text"
               id="supportEmail"
-              value="oohapps9@gmail.com"
+              value="ohhapps6@gmail.com"
               readonly
               class="readonly-input"
               title="Support email address"
@@ -1727,7 +1726,7 @@
             <input
               type="text"
               id="bugEmail"
-              value="oohapps9@gmail.com"
+              value="ohhapps6@gmail.com"
               readonly
               class="readonly-input"
               title="Bug report email address"

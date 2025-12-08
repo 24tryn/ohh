@@ -77,19 +77,9 @@ class OhhTaskManager {
             this.saveReminderSettings();
         });
 
-        // Wallet Management - FIXED: Added ?. to prevent errors if elements don't exist
+        // Wallet Management
         document.getElementById('myWalletsBtn')?.addEventListener('click', () => {
             document.getElementById('walletsModal')?.classList.add('active');
-        });
-
-        // FIXED: Add Wallet button now works with optional chaining
-        document.getElementById('addWalletBtn')?.addEventListener('click', () => {
-            this.addNewWallet();
-        });
-
-        // FIXED: Validate button now works with optional chaining
-        document.getElementById('validateWalletBtn')?.addEventListener('click', () => {
-            this.validateWalletAddress();
         });
 
         // Allow Enter key to add wallet - FIXED with optional chaining
@@ -197,9 +187,20 @@ class OhhTaskManager {
      * No connection to blockchain - just storing the address locally
      */
     addNewWallet() {
-        const address = document.getElementById('walletAddress').value.trim();
-        const name = document.getElementById('walletName').value.trim();
-
+        const addressInput = document.getElementById('walletAddress');
+        const nameInput = document.getElementById('walletName');
+        
+        // Check if inputs exist first
+        if (!addressInput || !nameInput) {
+            console.error('Wallet input fields not found');
+            alert('❌ Error: Wallet input fields not found. Please refresh the page.');
+            return;
+        }
+        
+        // Get values with null safety
+        const address = (addressInput.value || '').trim();
+        const name = (nameInput.value || '').trim();
+        
         // Validate inputs
         if (!address) {
             alert('❌ Please enter a wallet address');
@@ -255,7 +256,13 @@ class OhhTaskManager {
      * Validate wallet address format
      */
     validateWalletAddress() {
-        const address = document.getElementById('walletAddress').value.trim();
+    const addressInput = document.getElementById('walletAddress');
+    if (!addressInput) {
+        console.error('Wallet address input not found');
+        return;
+    }
+    
+    const address = addressInput.value.trim();
 
         if (!address) {
             alert('❌ Please enter a wallet address');
@@ -655,7 +662,7 @@ class OhhTaskManager {
 
     // ========== SUPPORT & BUG REPORTS ==========
     sendSupport() {
-        const email = 'oohapps9@gmail.com';
+        const email = 'ohhapps6@gmail.com';
         const subject = document.getElementById('supportSubject').value;
         const message = document.getElementById('supportMessage').value;
 
@@ -676,7 +683,7 @@ class OhhTaskManager {
     }
 
     sendBugReport() {
-        const email = 'oohapps9@gmail.com';
+        const email = 'ohhapps6@gmail.com';
         const title = document.getElementById('bugTitle').value;
         const description = document.getElementById('bugDescription').value;
 
